@@ -3,18 +3,13 @@ import numpy as np
 from PIL import Image
 import os
 
-# TensorFlow ko sirf tabhi import karein jab zarurat ho
-try:
-    import tensorflow as tf
-except ImportError:
-    st.error("TensorFlow install nahi ho saka. Niche terminal check karein.")
+import tensorflow as tf
 
-# Model load karne ka sahi naam
 model_path = 'TCF_Final_Crack_Modeel_11_April_2026.h5'
 
 if os.path.exists(model_path):
-    # Model loading logic yahan likhein
-    pass
+    model = tf.keras.models.load_model(model_path)
+
 else:
     st.error(f"Model file '{model_path}' nahi mili!")
 
