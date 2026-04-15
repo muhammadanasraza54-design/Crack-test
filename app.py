@@ -5,7 +5,16 @@ import os
 
 # TFLite Import with Fallback
 try:
+    import tflite_runtime.interpreter as tfliteimport streamlit as st
+import numpy as np # Agar error de to isay hata kar 'import numpy' rehne dein
+from PIL import Image, ImageOps
+import os
+
+try:
     import tflite_runtime.interpreter as tflite
+except ImportError:
+    # Fallback agar installation mein masla ho
+    st.error("tflite-runtime install nahi ho saki. Please Python 3.11 use karein.")
 except ImportError:
     try:
         from tensorflow import lite as tflite
