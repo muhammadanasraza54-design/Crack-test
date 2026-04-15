@@ -13,7 +13,7 @@ st.write("School buildings mein cracks detect karne ke liye image upload karein.
 @st.cache_resource
 def load_my_model():
     # Aapki file ka sahi path yahan likhein
-    model = tf.keras.models.load_model('TCF_Crack_Model_10_April_2026.h5')
+    model = tf.keras.models.load_model('TCF_Crack_Modeel_10_April_2026.h5')
     return model
 
 model = load_my_model()
