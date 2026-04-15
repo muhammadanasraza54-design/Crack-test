@@ -33,13 +33,13 @@ def get_interpreter():
             return None
     return None
 
-# 4. Prediction Function
 def predict(image_data, interpreter):
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
-    # Image Preprocessing
-    size = (224, 224)
+    # Is line ko 224 se badal kar 120 kar dein
+    size = (120, 120) 
+    
     img = ImageOps.fit(image_data, size, Image.Resampling.LANCZOS)
     img_array = np.asarray(img).astype('float32') / 255.0
     img_reshape = img_array[np.newaxis, ...]
