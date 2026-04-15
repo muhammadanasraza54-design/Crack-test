@@ -1,21 +1,22 @@
 import streamlit as st
-import tensorflow as tf
-from PIL import Image, ImageOps
 import numpy as np
+from PIL import Image
+import os
 
-# Page configuration
-st.set_page_config(page_title="TCF Crack Detection Portal", layout="centered")
+# TensorFlow ko sirf tabhi import karein jab zarurat ho
+try:
+    import tensorflow as tf
+except ImportError:
+    st.error("TensorFlow install nahi ho saka. Niche terminal check karein.")
 
-st.title("🏗️ Building Crack Detection Portal")
-st.write("School buildings mein cracks detect karne ke liye image upload karein.")
+# Model load karne ka sahi naam
+model_path = 'TCF_Final_Crack_Modeel_11_April_2026.h5'
 
-# Model load karein
-@st.cache_resource
-def load_my_model():
-    # Aapki file ka sahi path yahan likhein
-    model = tf.keras.models.load_model('TCF_Final_Crack_Modeel_11_April_2026.h5')
-    return model
-
+if os.path.exists(model_path):
+    # Model loading logic yahan likhein
+    pass
+else:
+    st.error(f"Model file '{model_path}' nahi mili!")
 model = load_my_model()
 
 # Image upload function
