@@ -3,40 +3,37 @@ import numpy as np
 from PIL import Image, ImageOps
 import os
 
-# TFLite Import with Fallback
-try:
-    import tflite_runtime.interpreter as tfliteimport streamlit as st
-import numpy as np # Agar error de to isay hata kar 'import numpy' rehne dein
-from PIL import Image, ImageOps
-import os
-
+# 1. TFLite Safe Import (Har command alag line par)
 try:
     import tflite_runtime.interpreter as tflite
-except ImportError:
-    # Fallback agar installation mein masla ho
-    st.error("tflite-runtime install nahi ho saki. Please Python 3.11 use karein.")
 except ImportError:
     try:
         from tensorflow import lite as tflite
     except ImportError:
-        st.error("❌ Critical Error: TFLite Runtime or TensorFlow not found. Please check requirements.txt")
+        st.error("❌ Critical Error: TFLite Runtime or TensorFlow not found.")
 
-# Page Configuration
+# 2. Page Configuration
 st.set_page_config(page_title="TCF Crack Detection", page_icon="🏗️")
 st.title("🏗️ TCF Building Crack Detection")
 st.write("School buildings ki structural safety check karne ke liye AI portal.")
 
+# Model file ka naam (Ensure karein ke GitHub par yehi naam ho)
 model_path = 'model.tflite'
 
-# Model Loader with Cache (App ki speed barhane ke liye)
+# 3. Model Loader with Cache
 @st.cache_resource
 def get_interpreter():
     if os.path.exists(model_path):
-        interpreter = tflite.Interpreter(model_path=model_path)
-        interpreter.allocate_tensors()
-        return interpreter
+        try:
+            interpreter = tflite.Interpreter(model_path=model_path)
+            interpreter.allocate_tensors()
+            return interpreter
+        except Exception as e:
+            st.error(f"Model load karne mein masla: {e}")
+            return None
     return None
 
+# 4. Prediction Function
 def predict(image_data, interpreter):
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
@@ -52,7 +49,7 @@ def predict(image_data, interpreter):
     interpreter.invoke()
     return interpreter.get_tensor(output_details[0]['index'])[0][0]
 
-# UI Setup
+# 5. UI Setup
 file = st.file_uploader("🏫 School ki photo upload karein", type=["jpg", "png", "jpeg"])
 
 if file is not None:
@@ -76,4 +73,4 @@ if file is not None:
                 except Exception as e:
                     st.error(f"Prediction mein masla aaya: {e}")
         else:
-            st.error(f"❌ Error: Model file '{model_path}' repository mein nahi mili.")
+            st.error(f"❌ Error: Model file '{model_path}' nahi mili ya load nahi ho saki.")
