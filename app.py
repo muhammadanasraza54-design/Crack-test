@@ -65,27 +65,36 @@ if file is not None:
                 try:
                     score = predict(image, interpreter)
                     
-                    # 6. Result Display Logic
+                    # 6. Behtar Result Display Logic
                     if score > 0.5:
                         st.error(f"⚠️ **Crack Detected!**")
                         
-                        # Visual clarity columns
-                        col1, col2 = st.columns(2)
+                        # Calculation for visual clarity
+                        crack_percentage = score * 100
+                        # Pixels se size ka andaza (approximate scale)
+                        estimated_width = "Major" if score > 0.85 else "Minor"
+                        
+                        col1, col2, col3 = st.columns(3)
                         with col1:
                             st.metric("AI Confidence", f"{score:.2%}")
                         with col2:
-                            # Severity based on confidence
-                            severity = "High" if score > 0.8 else "Medium"
-                            st.metric("Severity Level", severity)
+                            st.metric("Crack Intensity", f"{crack_percentage:.1f}%")
+                        with col3:
+                            st.metric("Crack Type", estimated_width)
 
-                        st.subheader("📊 Analysis Summary:")
-                        st.write(f"* **Detection Probability:** 100 mein se {score*100:.1f} hissa imkan hai ke ye structural defect hai.")
-                        st.write(f"* **Urgency:** {'Fauri munaayna (inspection) zaroori hai.' if score > 0.8 else 'Routine maintenance mein check karein.'}")
+                        st.subheader("📊 Detailed Analysis Summary:")
                         
-                        st.warning("📋 **Recommendation:** Maintenance team ko notify karein aur structural stability report check karein.")
+                        # Parhne walon ke liye asaan points
+                        st.write(f"1. **Severity:** Deewar par crack ki shiddat **{crack_percentage:.1f}%** record ki gayi hai.")
+                        st.write(f"2. **Physical Observation:** Ye aik **{estimated_width}** structural defect maloom hota hai.")
+                        st.write(f"3. **Risk Level:** {'Ziyada (High)' if score > 0.8 else 'Darmayana (Medium)'}.")
+                        st.write(f"4. **Urgency:** {'Fauri munaayna (inspection) aur repair zaroori hai.' if score > 0.8 else 'Routine maintenance checklist mein shamil karein.'}")
+                        
+                        st.divider()
+                        st.warning("📋 **Engineer's Recommendation:** Maintenance team ko is school ka portal reference de kar notify karein aur structural stability report check karein.")
                     else:
                         st.success(f"✅ **Structure Safe.**")
-                        st.info(f"AI Prediction: 100 mein se {(1-score)*100:.1f}% imkan hai ke structure mehfooz hai.")
+                        st.info(f"AI Analysis: 100 mein se {(1-score)*100:.1f}% imkan hai ke structure mein koi wazeh crack nahi hai.")
                 
                 except Exception as e:
                     st.error(f"Prediction mein masla aaya: {e}")
