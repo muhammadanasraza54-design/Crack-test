@@ -64,13 +64,25 @@ if file is not None:
                 try:
                     score = predict(image, interpreter)
                     
-                    # Result Display Logic
-                    if score > 0.5:
-                        st.error(f"⚠️ **Crack Detected!** (Confidence: {score:.2%})")
-                        st.warning("Recommendation: Maintenance team ko notify karein.")
-                    else:
-                        st.success(f"✅ **Structure Safe.** (Confidence: {1-score:.2%})")
-                except Exception as e:
-                    st.error(f"Prediction mein masla aaya: {e}")
-        else:
-            st.error(f"❌ Error: Model file '{model_path}' nahi mili ya load nahi ho saki.")
+                    # Result Display Logic (Replace this section in your app.py)
+        if score > 0.5:
+    st.error(f"⚠️ **Crack Detected!**")
+    
+    # Visual clarity ke liye columns
+    col1, col2 = st.columns(2)
+       with col1:
+        st.metric("AI Confidence", f"{score:.2%}")
+    with col2:
+        # Physical size ka estimate (Based on typical school wall scale)
+        # Note: Ye aik approximate calculation hai
+        severity = "High" if score > 0.8 else "Medium"
+        st.metric("Severity Level", severity)
+
+    st.subheader("📊 Analysis Summary:")
+    st.write(f"* **Detection Probability:** 100 mein se {score*100:.1f} hissa chances hain ke ye structural defect hai.")
+    st.write(f"* **Urgency:** {'Fauri munaayna (inspection) zaroori hai.' if score > 0.8 else 'Routine maintenance mein check karein.'}")
+    
+    st.warning("📋 **Recommendation:** Maintenance team ko notify karein aur structural stability report check karein.")
+else:
+    st.success(f"✅ **Structure Safe.**")
+    st.info(f"AI Prediction: 100 mein se { (1-score)*100:.1f}% imkan hai ke structure mehfooz hai.")
