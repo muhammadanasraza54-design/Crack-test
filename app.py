@@ -1,56 +1,45 @@
 import streamlit as st
 import numpy as np
-from PIL import Image, ImageOps # ImageOps zaroori hai prediction ke liye
+from PIL import Image, ImageOps
 import os
-import tensorflow as tf
+import tflite_runtime.interpreter as tflite
 
-# TCF Branding & UI
-st.set_page_config(page_title="TCF Crack Detection", page_icon="🏗️")
+st.set_page_config(page_title="TCF Crack Detection")
 st.title("🏗️ Building Crack Detection Portal")
-st.write("TCF school buildings ki safety ke liye automatic crack detection system.")
 
-# Model path jo aapke GitHub par hai
-model_path = 'TCF_Final_Crack_Modeel_11_April_2026.h5'
+# TFLite Model ka naam (Ye file aapko abhi banani hogi niche step mein)
+model_path = 'model.tflite'
 
-# Model loading logic with Cache taake app fast chale
-@st.cache_resource
-def load_my_model():
-    if os.path.exists(model_path):
-        return tf.keras.models.load_model(model_path)
-    return None
+def predict_tflite(image_data):
+    interpreter = tflite.Interpreter(model_path=model_path)
+    interpreter.allocate_tensors()
+    
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    
+    # Preprocessing
+    size = (224, 224)
+    img = ImageOps.fit(image_data, size, Image.Resampling.LANCZOS)
+    img_array = np.asarray(img).astype('float32') / 255.0
+    img_reshape = img_array[np.newaxis, ...]
+    
+    interpreter.set_tensor(input_details[0]['index'], img_reshape)
+    interpreter.invoke()
+    prediction = interpreter.get_tensor(output_details[0]['index'])
+    return prediction[0][0]
 
-model = load_my_model()
+file = st.file_uploader("Upload School Image", type=["jpg", "png", "jpeg"])
 
-if model is None:
-    st.error(f"❌ Model file '{model_path}' nahi mili!")
-else:
-    # Image upload UI
-    file = st.file_uploader("School ki image upload karein", type=["jpg", "png", "jpeg"])
-
-    def import_and_predict(image_data, model):
-        size = (224, 224) 
-        image = ImageOps.fit(image_data, size, Image.Resampling.LANCZOS)
-        img_array = np.asarray(image)
-        img_reshape = img_array[np.newaxis, ...]
-        
-        # Preprocessing (Scaling)
-        img_reshape = img_reshape.astype('float32') / 255.0
-        
-        prediction = model.predict(img_reshape)
-        return prediction
-
-    if file is not None:
-        image = Image.open(file)
-        st.image(image, caption="Uploaded Image", use_container_width=True)
-        
-        if st.button("🔍 Analyze Structure"):
-            with st.spinner('Processing...'):
-                predictions = import_and_predict(image, model)
-                score = predictions[0][0]
-                
-                # Result display
-                if score > 0.5:
-                    st.error(f"⚠️ **Crack Detected!** (Confidence: {score:.2%})")
-                    st.warning("Zaroori: Engineering department ko notify karein.")
-                else:
-                    st.success(f"✅ **No Major Crack Detected.** (Confidence: {1 - score:.2%})")
+if file is not None:
+    image = Image.open(file)
+    st.image(image, use_container_width=True)
+    
+    if st.button("Analyze"):
+        if os.path.exists(model_path):
+            score = predict_tflite(image)
+            if score > 0.5:
+                st.error(f"⚠️ Crack Detected! ({score:.2%})")
+            else:
+                st.success(f"✅ Safe: No Crack ({1-score:.2%})")
+        else:
+            st.warning("Pehle model.tflite file upload karein.")
