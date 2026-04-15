@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image, ImageOps
 import os
 
-# 1. TFLite Safe Import (Har command alag line par)
+# 1. TFLite Safe Import
 try:
     import tflite_runtime.interpreter as tflite
 except ImportError:
@@ -17,7 +17,7 @@ st.set_page_config(page_title="TCF Crack Detection", page_icon="🏗️")
 st.title("🏗️ TCF Building Crack Detection")
 st.write("School buildings ki structural safety check karne ke liye AI portal.")
 
-# Model file ka naam (Ensure karein ke GitHub par yehi naam ho)
+# Model file ka naam
 model_path = 'model.tflite'
 
 # 3. Model Loader with Cache
@@ -33,11 +33,12 @@ def get_interpreter():
             return None
     return None
 
+# 4. Prediction Function
 def predict(image_data, interpreter):
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
-    # Is line ko 224 se badal kar 120 kar dein
+    # Model requirement: 120x120 pixels
     size = (120, 120) 
     
     img = ImageOps.fit(image_data, size, Image.Resampling.LANCZOS)
@@ -64,25 +65,29 @@ if file is not None:
                 try:
                     score = predict(image, interpreter)
                     
-                    # Result Display Logic (Replace this section in your app.py)
-        if score > 0.5:
-    st.error(f"⚠️ **Crack Detected!**")
-    
-    # Visual clarity ke liye columns
-    col1, col2 = st.columns(2)
-       with col1:
-        st.metric("AI Confidence", f"{score:.2%}")
-    with col2:
-        # Physical size ka estimate (Based on typical school wall scale)
-        # Note: Ye aik approximate calculation hai
-        severity = "High" if score > 0.8 else "Medium"
-        st.metric("Severity Level", severity)
+                    # 6. Result Display Logic
+                    if score > 0.5:
+                        st.error(f"⚠️ **Crack Detected!**")
+                        
+                        # Visual clarity columns
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("AI Confidence", f"{score:.2%}")
+                        with col2:
+                            # Severity based on confidence
+                            severity = "High" if score > 0.8 else "Medium"
+                            st.metric("Severity Level", severity)
 
-    st.subheader("📊 Analysis Summary:")
-    st.write(f"* **Detection Probability:** 100 mein se {score*100:.1f} hissa chances hain ke ye structural defect hai.")
-    st.write(f"* **Urgency:** {'Fauri munaayna (inspection) zaroori hai.' if score > 0.8 else 'Routine maintenance mein check karein.'}")
-    
-    st.warning("📋 **Recommendation:** Maintenance team ko notify karein aur structural stability report check karein.")
-else:
-    st.success(f"✅ **Structure Safe.**")
-    st.info(f"AI Prediction: 100 mein se { (1-score)*100:.1f}% imkan hai ke structure mehfooz hai.")
+                        st.subheader("📊 Analysis Summary:")
+                        st.write(f"* **Detection Probability:** 100 mein se {score*100:.1f} hissa imkan hai ke ye structural defect hai.")
+                        st.write(f"* **Urgency:** {'Fauri munaayna (inspection) zaroori hai.' if score > 0.8 else 'Routine maintenance mein check karein.'}")
+                        
+                        st.warning("📋 **Recommendation:** Maintenance team ko notify karein aur structural stability report check karein.")
+                    else:
+                        st.success(f"✅ **Structure Safe.**")
+                        st.info(f"AI Prediction: 100 mein se {(1-score)*100:.1f}% imkan hai ke structure mehfooz hai.")
+                
+                except Exception as e:
+                    st.error(f"Prediction mein masla aaya: {e}")
+        else:
+            st.error(f"❌ Error: Model file '{model_path}' nahi mili ya load nahi ho saki.")
