@@ -17,7 +17,6 @@ if os.path.exists(model_path):
     pass
 else:
     st.error(f"Model file '{model_path}' nahi mili!")
-model = load_my_model()
 
 # Image upload function
 file = st.file_uploader("Please upload an image", type=["jpg", "png", "jpeg"])
